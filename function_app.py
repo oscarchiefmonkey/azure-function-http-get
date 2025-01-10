@@ -1,16 +1,25 @@
 import azure.functions as func
 import logging
-import requests
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="HttpExample")
 def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
-    response = requests.get('http://voosl-srv-ba03.no.capio.net:8090/hrm_ws/secure/persons/company/1/start-id/0/end-id/99999')
-    
-    # Return the response from the target URL
-    return func.HttpResponse(
-        response.text,
-        status_code=response.status_code,
-    )
+
+    name = req.params.get('name')
+    if not name:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            name = req_body.get('name')
+
+    if name:
+        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
+    else:
+        return func.HttpResponse(
+             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+             status_code=200
+        )
