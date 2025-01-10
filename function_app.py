@@ -1,5 +1,6 @@
 import azure.functions as func
 import logging
+import requests  # Import the requests library for making HTTP requests
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -7,19 +8,35 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    name = req.params.get('name')
-    if not name:
+    # Extract the target URL from the query parameters
+    target_url = req.params.get('url')
+    if not target_url:
         try:
             req_body = req.get_json()
         except ValueError:
             pass
         else:
-            name = req_body.get('name')
+            target_url = req_body.get('url')
 
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
+    if target_url:
+        try:
+            # Perform the GET request to the specified URL
+            response = requests.get(target_url)
+            
+            # Return the response from the target URL
+            return func.HttpResponse(
+                response.text,
+                status_code=response.status_code,
+                headers={"Content-Type": response.headers.get("Content-Type", "text/plain")}
+            )
+        except requests.RequestException as e:
+            logging.error(f"Error making GET request to {target_url}: {e}")
+            return func.HttpResponse(
+                f"Failed to fetch data from {target_url}. Error: {str(e)}",
+                status_code=400
+            )
     else:
         return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-             status_code=200
+            "Please provide a 'url' parameter in the query string or request body.",
+            status_code=400
         )
