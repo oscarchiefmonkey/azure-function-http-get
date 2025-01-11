@@ -1,6 +1,6 @@
 import azure.functions as func
 import logging
-import requests
+import urllib.request
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -8,19 +8,26 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    name = req.params.get('name')
-    if not name:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            name = req_body.get('name')
-
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-    else:
+    # Get the URL from query parameters
+    url = req.params.get('url')
+    if not url:
         return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-             status_code=200
+            "Please provide a URL in the query string, like ?url=http://example.com",
+            status_code=400
+        )
+
+    try:
+        # Make an HTTP GET request to the provided URL
+        with urllib.request.urlopen(url) as response:
+            # Read and decode the response data
+            data = response.read().decode('utf-8')
+        
+        # Return the fetched data as the response
+        return func.HttpResponse(data, status_code=200)
+
+    except urllib.error.URLError as e:
+        logging.error(f"Failed to fetch URL: {e.reason}")
+        return func.HttpResponse(
+            f"Error fetching URL because: {e.reason}",
+            status_code=400
         )
