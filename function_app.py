@@ -31,7 +31,7 @@ def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
 
         # Perform the HTTP GET request
         with urllib.request.urlopen(request, timeout=30) as response:  # Set a timeout
-            data = response.read().decode("utf-8")
+            data = response.read()
 
         # Return the response data
         return func.HttpResponse(data, status_code=200)
