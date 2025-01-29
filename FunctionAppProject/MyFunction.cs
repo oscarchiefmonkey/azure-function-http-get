@@ -57,6 +57,7 @@ public class MyFunction
 
             return functionResponse;
         }
+
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching data: {ex.Message}");
