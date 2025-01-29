@@ -21,7 +21,7 @@ public class MyFunction
 
     [Function("GetExternalData")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)  // ✅ Requires Function Key
     {
         _logger.LogInformation("Function triggered - Fetching external data...");
 
