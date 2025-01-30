@@ -1,31 +1,31 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Functions.Worker.Http;
+using System.Threading.Tasks;
 
-namespace FunctionApp1
+namespace FunctionApp12
 {
     public class Function1
     {
         private readonly ILogger<Function1> _logger;
-
-        public Function1(ILogger<Function1> logger)
+        public Function1 (ILogger<Function1> logger)
         {
             _logger = logger;
         }
-
         [Function("Function1")]
-        public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public IActionResult Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
-            _logger.LogTrace("This is a TRACE log message");
-            _logger.LogDebug("This is a DEBUG log message");
-            _logger.LogInformation("This is a INFORMATION log message");
-            _logger.LogWarning("This is a WARNING log message");
-            _logger.LogError("This is a ERROR log message");
-            _logger.LogCritical("This is a CRITICAL log message");
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
-            return new OkObjectResult("Welcome to Azure Functions!");
+            _logger?.LogCritical("Critical log");
+            _logger?.LogWarning("Warning log");
+            _logger?.LogError("Error Log");
+            _logger?.LogInformation("Information log");
+
+            var responseMessage = "Welcome to Azure Functions";
+
+           return new OkObjectResult(responseMessage);
         }
     }
 }
